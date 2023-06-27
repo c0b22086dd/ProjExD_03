@@ -135,7 +135,7 @@ class Beam:
         引数に基づきビームSurfaceを生成
         引数 bird：画面Surface
         """
-        self.img = pg.image.load(f"ex03/fig/beam.png")
+        self.img = pg.transform.rotozoom(pg.image.load(f"ex03/fig/beam.png"), 0, 2.0)
         self.rct = self.img.get_rect()
         self.rct.left = bird.rct.right
         self.rct.centery = bird.rct.centery
@@ -148,6 +148,30 @@ class Beam:
         """
         self.rct.move_ip(self.vx, self.vy)
         screen.blit(self.img, self.rct)
+
+
+class Score:
+    """
+    スコアに関するクラス
+    """
+    def __init__(self):
+        """
+        スコアの初期化
+        """
+        self.font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
+        self.color = (0, 0, 255)
+        self.score = 0
+        self.img = self.font.render("スコア:" + str(self.score), 0,  self.color)
+        self.rct = self.img.get_rect()
+        self.rct.center = (100, HEIGHT - 50)
+
+    def update(self, screen: pg.Surface):
+        """
+        スコアの更新と画面への描画
+        引数 screen：画面Surface
+        """
+        self.img = self.font.render("スコア:" + str(self.score), 0, self.color)
+        screen.blit(self.img, self.rct)
     
 
 def main():
@@ -158,6 +182,8 @@ def main():
     # bomb = Bomb((255, 0, 0), 10)
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
     beam = None
+    score = Score()
+   
 
     clock = pg.time.Clock()
     tmr = 0
@@ -178,13 +204,14 @@ def main():
                 pg.display.update()
                 time.sleep(1)
                 return
-        
+                
         for i, bomb in enumerate(bombs):
             if beam is not None:
                 if bomb.rct.colliderect(beam.rct):
                     bombs[i] = None
                     beam = None
                     bird.change_img(6, screen)
+                    score.score += 1
                     pg.display.update()
 
         key_lst = pg.key.get_pressed()
@@ -194,6 +221,7 @@ def main():
             bomb.update(screen)
         if beam is not None:
             beam.update(screen)
+        score.update(screen)
         pg.display.update()
         tmr += 1
         clock.tick(50)
